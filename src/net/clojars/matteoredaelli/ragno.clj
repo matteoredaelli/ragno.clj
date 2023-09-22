@@ -41,12 +41,24 @@
                          :url url
                          :error (str "caught exception: " e)}))))
 
+
+(defn check-link [link]
+  (let [resp (get-request link :stream)]
+    {:url link
+     :final-url (str (:uri resp))
+     :status (:status resp)}
+    )
+  )
+
+(defn check-links [links]
+  (mapv check-link links))
+
 (defn analyze-get-response
   "I don't do a whole lot."
-  [url resp]
+  [url resp opts]
   (let [body (str (:body resp))
         soup (Jsoup/parse body)
-        ;body-headers (distinct (html-ext/extract-element-text soup "h1,h2"))
+        ;; body-headers (distinct (html-ext/extract-element-text soup "h1,h2"))
         body-links (distinct (html-ext/extract-links soup))
         emails (distinct (links-ext/filter-email-links body-links))
         body-web-links (->> body-links
@@ -64,10 +76,13 @@
     {:status (:status resp)
      :http-headers (:headers resp)
      :url url
-     :final_url (str (:uri resp))
-     ;:body-headers body-headers
+     :final-url (str (:uri resp))
+     :check-links (if (:check-links opts)
+                    (check-links body-web-links)
+                    [])
+                                        ;:body-headers body-headers
      :body-external-links body-external-links
-     :body-domain-links body-domain-links
+     :domain-links body-domain-links
      :body-internal-links body-internal-links
      :head-title head-title
      :head-description head-description
@@ -77,20 +92,35 @@
   
 (defn surf
   "I don't do a whole lot."
-  [url]
+  [url opts]
   (let [resp (get-request url :string)
         status (:status resp)]
     (if (and (>= status 200)
              (< status 400))
-      (analyze-get-response url resp)
+      (
+       ;; check if domain changes
+       let [final-url (str (:uri resp))
+            domain (uri-ext/get-domain-url (uri url))
+            final-domain (uri-ext/get-domain-url (uri final-url))]
+       (if (= domain final-domain)
+         (analyze-get-response url resp opts)
+         ;; redirect to a new domain. nothing to do, just adding the final domain for a further crawling 
+         {:status 301
+          :real-status status
+          :url url
+          :final-url final-url
+          :link-domains [final-domain]}
+         ))
+      ;; status not ok
       resp
       )))
 
 (defn cli
   [opts]
-  (->> (get opts :url)
-       surf
-       (json/write-str)
-       println
-       )
-  )
+  (let [surf_opts {:check-links false}]
+    (-> (get opts :url)
+         (surf surf_opts)
+         (json/write-str)
+         println
+         )
+    ))

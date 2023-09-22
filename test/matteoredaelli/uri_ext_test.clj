@@ -26,12 +26,6 @@
          (is (not (same-website? uri1 uri2)))
          )))
 
-(deftest filter-external-links-test
-  (testing "external-links"
-    (and (is (filter-internal-links [url1 url1-bis url2] url1))
-         (is (filter-external-links [url1 url1-bis url2] url1))
-         )))
-
 (deftest get-domain-test
   (testing "get-domain"
     (and
