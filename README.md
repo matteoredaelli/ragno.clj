@@ -1,15 +1,13 @@
-# matteoredaelli/ragno
+# ragno
 
 A crawler for extracting info from web domains
 
 ## Usage
 
-FIXME: write usage documentation!
-
 Invoke a library API function from the command-line:
 
-    $ clojure -X matteoredaelli.ragno/foo :a 1 :b '"two"'
-    {:a 1, :b "two"} "Hello, World!"
+    $clojure -X net.clojars.matteoredaelli.ragno/cli :url \"http://redaelli.org\"
+
 
 Run the project's tests (they'll fail until you edit them):
 
