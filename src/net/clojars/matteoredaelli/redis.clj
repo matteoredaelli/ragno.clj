@@ -40,7 +40,7 @@
                   (let [url (get msg 2)
                         resp (ragno/surf url ragno-options)]
                     (println resp)
-                    (wcar * (car/set url resp))
+                    (wcar * (car/set url (json/write-str resp)))
                     )
                  )
                )

@@ -8,6 +8,12 @@ Invoke a library API function from the command-line:
 
     $clojure -X net.clojars.matteoredaelli.ragno/cli :url \"http://redaelli.org\"
 
+Using Redis or Apache kvrocks or Snap KeyDB
+
+    $clojure -X net.clojars.matteoredaelli.redis/cli :config-file \"/home/matteo/src/github/ragno.clj/ragno.edn\"
+
+    $redis-cli publish ragno "https://www.redaelli.org/"
+    
 
 Run the project's tests (they'll fail until you edit them):
 
