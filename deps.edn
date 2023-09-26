@@ -7,7 +7,7 @@
         ;;io.github.babashka/http-client {:git/tag "v0.4.15"}
         org.babashka/http-client {:mvn/version "0.4.15"}
         lambdaisland/uri {:mvn/version "1.15.125"}
-        
+        com.taoensso/carmine {:mvn/version "3.3.0-RC1"}
         ;net.clojars.matteoredaelli/uri-ext {:local/root "../gitlab/uri-ext"} ;{:mvn/version "0.1.1-SNAPSHOT"}
         ;net.clojars.matteoredaelli/html-ext {:mvn/version "0.1.1-SNAPSHOT"}
         }

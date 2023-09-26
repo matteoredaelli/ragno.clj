@@ -1,6 +1,7 @@
 (ns net.clojars.matteoredaelli.ragno
   (:import (org.jsoup Jsoup))
   (:require [clojure.string :as str]
+            [clojure.edn :as edn]
             [clojure.data.json :as json]
             [net.clojars.matteoredaelli.uri-ext :as uri-ext]
             [net.clojars.matteoredaelli.html-ext :as html-ext]
@@ -117,10 +118,9 @@
 
 (defn cli
   [opts]
-  (let [surf_opts {:check-links false}]
-    (-> (get opts :url)
-         (surf surf_opts)
-         (json/write-str)
-         println
-         )
-    ))
+  (let
+      [surf_opts {:check-links false}]
+    (-> (:url opts)
+        (surf surf_opts)
+        (json/write-str)
+        println)))
