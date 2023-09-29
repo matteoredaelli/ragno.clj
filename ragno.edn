@@ -1,11 +1,11 @@
 {:http_options {:follow-redirects :always
                 ;; :proxy {:host "proxy.local"
-                 ;;         :port 80}
+                ;;         :port 80}
                                       
                  ;; :connect-timeout  10000
                  ;; :throw-exceptions false
                  }
- :ragno-options {:check-links false}
+ :ragno-options {:check-links true}
  :redis {:url "redis://localhost:6379/"
          :queue-name "ragno"}
  }

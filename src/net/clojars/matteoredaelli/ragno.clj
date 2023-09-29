@@ -74,8 +74,6 @@
                             links-ext/remove-empty-links
                             links-ext/remove-links-with-fragment
                             links-ext/remove-links-with-mailto)
-        body-external-links (links-ext/filter-external-links body-web-links url)
-        body-internal-links (links-ext/filter-internal-links body-web-links url)
         body-domain-links (distinct (links-ext/get-domain-links body-web-links))
         head-description [(html-ext/extract-head-meta-content soup "name" "description")
                           (html-ext/extract-head-meta-content soup "property" "og:description")]
@@ -90,9 +88,8 @@
                     (check-links body-web-links)
                     [])
                                         ;:body-headers body-headers
-     :body-external-links body-external-links
+     :links body-web-links
      :domain-links body-domain-links
-     :body-internal-links body-internal-links
      :head-title head-title
      :head-description head-description
      :head-keywords head-keywords

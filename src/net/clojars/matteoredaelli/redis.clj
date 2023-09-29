@@ -11,6 +11,7 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.data.json :as json]
+            [clojure.tools.logging :as log]
             [net.clojars.matteoredaelli.ragno :as ragno]
             [taoensso.carmine :as car :refer [wcar]]
             ))
@@ -28,6 +29,11 @@
 
 (defonce my-conn-pool (car/connection-pool {})) 
 
+(defn get-lock-key
+  [url]
+  (str "lock-" url)
+  )
+
 (defn redis-worker
   [redis ragno-options]
   (def queue-name (:queue-name redis))
@@ -42,23 +48,30 @@
     (car/with-new-pubsub-listener my-conn-spec
       {
        queue-name (fn f1
-                [msg]
-                (println (get msg 0) "->" (get msg 2))
-                (if (= "message" (get msg 0))
-                  (let [url (get msg 2)
-                        resp (ragno/surf url ragno-options)]
-                    (println resp)
-                    (wcar * (car/set url (json/write-str resp)))
+                    [msg]
+                    (if (= "message" (get msg 0))
+                      (let [url (get msg 2)
+                            lock-key (get-lock-key url)]
+                            ;; checking if a lock exists
+                            (if (= 1 (count (wcar * (car/keys lock-key))))
+                              (log/warn (str "Skipping url" url " | A lock already exists"))
+                              (do
+                                (wcar * (car/set lock-key "surf"))
+                                (let [resp (ragno/surf url ragno-options)]
+                                 (wcar * (car/set url (json/write-str resp)))
+                                 (wcar * (car/del lock-key))
+                                 ))
+                              )
+                            )
+                      )
                     )
-                 )
-               )
-       queue-name-star  (fn f2 [msg] (println "Pattern match: " msg))}
+       queue-name-star  (fn f2 [msg] (log/debug msg))}
       (car/subscribe  queue-name)
       (car/psubscribe queue-name-star)
       ))
 
   (Thread/sleep 1000000000)
-  (wcar* (car/close-listener listener))
+  (wcar * (car/close-listener listener))
   ;;(car-mq/stop my-worker)
   )
 
