@@ -54,7 +54,7 @@
                             lock-key (get-lock-key url)]
                             ;; checking if a lock exists
                             (if (= 1 (count (wcar * (car/keys lock-key))))
-                              (log/warn (str "Skipping url" url " | A lock already exists"))
+                              (log/warn (str "Skipping url < " url " >: a lock already exists for it"))
                               (do
                                 (wcar * (car/set lock-key "surf"))
                                 (let [resp (ragno/surf url ragno-options)]

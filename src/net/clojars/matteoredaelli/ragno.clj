@@ -11,6 +11,7 @@
   (:require [clojure.string :as str]
             [clojure.edn :as edn]
             [clojure.data.json :as json]
+            [clojure.tools.logging :as log]
             [net.clojars.matteoredaelli.uri-ext :as uri-ext]
             [net.clojars.matteoredaelli.html-ext :as html-ext]
             [net.clojars.matteoredaelli.links-ext :as links-ext]
@@ -65,6 +66,7 @@
 (defn analyze-get-response
   "I don't do a whole lot."
   [url resp opts]
+  (log/debug (str "analyze-get-response " url))
   (let [body (str (:body resp))
         soup (Jsoup/parse body)
         ;; body-headers (distinct (html-ext/extract-element-text soup "h1,h2"))
@@ -74,7 +76,19 @@
                             links-ext/remove-empty-links
                             links-ext/remove-links-with-fragment
                             links-ext/remove-links-with-mailto)
-        body-domain-links (distinct (links-ext/get-domain-links body-web-links))
+        check-links (if (:check-links opts)
+                      (check-links body-web-links)
+                      [])
+        corrupted-links (->> (filterv #( = -1 (:status %)) check-links)
+                             (map #(:url %)))
+        good-links (->> (map #(:final-url %) check-links)
+                        links-ext/remove-empty-links
+                        distinct)
+        domain-links (->> (concat body-web-links good-links)
+                          distinct
+                          links-ext/remove-empty-links
+                          links-ext/get-domain-links
+                          distinct)
         head-description [(html-ext/extract-head-meta-content soup "name" "description")
                           (html-ext/extract-head-meta-content soup "property" "og:description")]
         head-keywords (html-ext/extract-head-meta-content soup "name" "keywords")
@@ -84,12 +98,11 @@
      :http-headers (:headers resp)
      :url url
      :final-url (str (:uri resp))
-     :check-links (if (:check-links opts)
-                    (check-links body-web-links)
-                    [])
-                                        ;:body-headers body-headers
+     ;; :body-headers body-headers
      :links body-web-links
-     :domain-links body-domain-links
+     :corrupted-links corrupted-links
+     :good-links good-links
+     :domain-links domain-links
      :head-title head-title
      :head-description head-description
      :head-keywords head-keywords
@@ -99,6 +112,7 @@
 (defn surf
   "I don't do a whole lot."
   [url opts]
+  (log/debug (str "surf " url))
   (let [resp (get-request url :string)
         status (:status resp)]
     (if (and (>= status 200)
