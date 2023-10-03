@@ -4,6 +4,12 @@ A crawler for extracting info from web domains
 
 ## Usage
 
+Copy and edit the configuration file
+
+```bash
+cp ragno-sample.edn ragno.edn
+```
+
 Invoke a library API function from the command-line:
 
     $clojure -X net.clojars.matteoredaelli.ragno/cli :url \"http://redaelli.org\"
