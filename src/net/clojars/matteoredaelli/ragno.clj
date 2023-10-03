@@ -34,14 +34,7 @@
   ([url as]
    (get-request url
                 as
-                {:follow-redirects :always
-                 ;; :proxy {:host "proxyzscaler.group.pirelli.com"
-                 ;;         :port 80}
-                                      
-                 ;; :connect-timeout  10000
-                 ;; :throw-exceptions false
-                 }
-                ))
+                {:follow-redirects :always}))
   ([url as http_options]
    (try
      (http/get url {:as as
