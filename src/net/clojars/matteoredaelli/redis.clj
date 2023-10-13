@@ -22,9 +22,9 @@
       (edn/read (java.io.PushbackReader. r)))
 
     (catch java.io.IOException e
-      (printf "Couldn't open '%s': %s\n" source (.getMessage e)))
+      (log/error "Couldn't open '%s': %s\n" source (.getMessage e)))
     (catch RuntimeException e
-      (printf "Error parsing edn file '%s': %s\n" source (.getMessage e)))))
+      (log/error "Error parsing edn file '%s': %s\n" source (.getMessage e)))))
   
 
 (defonce my-conn-pool (car/connection-pool {})) 
@@ -34,8 +34,9 @@
   (str "lock-" url)
   )
 
+
 (defn redis-worker
-  [redis ragno-options]
+  [redis ragno-options http-options]
   (def queue-name (:queue-name redis))
   (def queue-name-star (str queue-name "*"))
   (def my-conn-spec {:uri (:url redis)})
@@ -52,19 +53,21 @@
                     (if (= "message" (get msg 0))
                       (let [url (get msg 2)
                             lock-key (get-lock-key url)]
-                            ;; checking if a lock exists
-                            (if (= 1 (count (wcar * (car/keys lock-key))))
-                              (log/warn (str "Skipping url < " url " >: a lock already exists for it"))
-                              (do
-                                (wcar * (car/set lock-key "surf"))
-                                (let [resp (ragno/surf url ragno-options)]
-                                 (wcar * (car/set url (json/write-str resp)))
-                                 (wcar * (car/del lock-key))
-                                 ))
-                              )
-                            )
+                        ;; checking if a lock exists
+                        (if (= 1 (count (wcar * (car/keys lock-key))))
+                          (log/warn (str "Skipping url < " url " >: a lock already exists for it"))
+                          (do
+                            (log/debug (str "Setting lock key " lock-key))
+                            (wcar * (car/set lock-key "surf"))
+                            (def resp (ragno/surf url ragno-options http-options))
+                            (log/debug (str "Saving resp for url " url resp)) 
+                            (wcar * (car/set url (json/write-str resp)))
+                            (log/debug (str "Removing lock key " lock-key))
+                            (wcar * (car/del lock-key))
+                              ))
+                          )
+                        )
                       )
-                    )
        queue-name-star  (fn f2 [msg] (log/debug msg))}
       (car/subscribe  queue-name)
       (car/psubscribe queue-name-star)
@@ -80,6 +83,8 @@
   (let
       [config-file (:config-file opts)
        config (read-edn-file config-file)
+       http-options (:http-options config)
        ragno-options (:ragno-options config)
        redis (:redis config)]
-    (redis-worker redis ragno-options)))
+    (log/info config)
+    (redis-worker redis ragno-options http-options)))

@@ -31,18 +31,15 @@
 
 (defn get-request
   "Doing raw http requests"
-  ([url as]
-   (get-request url
-                as
-                {:follow-redirects :always}))
-  ([url as http_options]
+  [url as http-options]
+   (log/debug (str "get-request " url " - begin"))
    (try
      (http/get url {:as as
                     :throw false
-                    :client (http/client http_options)})
+                    :client (http/client http-options)})
      (catch Exception e {:status -1
                          :url url
-                         :error (str "caught exception: " e)}))))
+                         :error (str "caught exception: " e)})))
 
 
 (defn check-link [link]
@@ -54,24 +51,30 @@
   )
 
 (defn check-links [links]
-  (mapv check-link links))
+  (log/debug (str "check-links " links " - begin"))
+  (def resp (mapv check-link links))
+  (log/debug (str "check-links " links " - end"))
+  resp
+  )
 
 (defn analyze-get-response
   "I don't do a whole lot."
   [url resp opts]
-  (log/debug (str "analyze-get-response " url))
+  (log/debug (str "analyze-get-response " url " - begin"))
   (let [body (str (:body resp))
+        location (get-in resp [:headers :location] url)
         soup (Jsoup/parse body)
         ;; body-headers (distinct (html-ext/extract-element-text soup "h1,h2"))
         body-links (distinct (html-ext/extract-links soup))
         emails (distinct (links-ext/filter-email-links body-links))
-        body-web-links (->> body-links
-                            links-ext/remove-empty-links
+        body-web-links (->> ;; (conj body-links location)
+                        body-links
+                        links-ext/remove-empty-links
                             links-ext/remove-links-with-fragment
                             links-ext/remove-links-with-mailto)
-        check-links (if (:check-links opts)
-                      (check-links body-web-links)
-                      [])
+        ;; TODO SOme websites have too many links
+        ;; https://as.com has too many links and 
+        check-links (check-links (vec (take  (:check-links opts) body-web-links)))
         corrupted-links (->> (filterv #( = -1 (:status %)) check-links)
                              (map #(:url %)))
         good-links (->> (map #(:final-url %) check-links)
@@ -87,6 +90,7 @@
         head-keywords (html-ext/extract-head-meta-content soup "name" "keywords")
         head-title [(.title soup)
                     (html-ext/extract-head-meta-content soup "property" "og:title")]]
+    (log/debug (str "analyze-get-response " url " - end"))
     {:status (:status resp)
      :http-headers (:headers resp)
      :url url
@@ -104,9 +108,9 @@
   
 (defn surf
   "I don't do a whole lot."
-  [url opts]
-  (log/debug (str "surf " url))
-  (let [resp (get-request url :string)
+  [url ragno-options http-options]
+  (log/debug (str "surf " url " - begin"))
+  (let [resp (get-request url :string http-options)
         status (:status resp)]
     (if (and (>= status 200)
              (< status 400))
@@ -116,7 +120,7 @@
             domain (uri-ext/get-domain-url (uri url))
             final-domain (uri-ext/get-domain-url (uri final-url))]
        (if (= domain final-domain)
-         (analyze-get-response url resp opts)
+         (analyze-get-response url resp ragno-options)
          ;; redirect to a new domain. nothing to do, just adding the final domain for a further crawling 
          {:status 301
           :real-status status
@@ -133,6 +137,6 @@
   (let
       [surf_opts {:check-links false}]
     (-> (:url opts)
-        (surf surf_opts)
+        (surf surf_opts {:follow-redirects :always})
         (json/write-str)
         println)))
