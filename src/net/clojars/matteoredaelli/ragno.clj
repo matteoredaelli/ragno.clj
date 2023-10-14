@@ -19,15 +19,16 @@
             [babashka.http-client :as http]
             [lambdaisland.uri :refer [uri join]]))
 
-(defn ping
-  "I don't do a whole lot."
-  [args]
-  (prn (get args :url) "Hello, World!"))
+(defn read-edn-file [source]
+  (try
+    (with-open [r (io/reader source)]
+      (edn/read (java.io.PushbackReader. r)))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (prn x "Hello, World!"))
+    (catch java.io.IOException e
+      (log/error "Couldn't open '%s': %s\n" source (.getMessage e)))
+    (catch RuntimeException e
+      (log/error "Error parsing edn file '%s': %s\n" source (.getMessage e)))))
+  
 
 (defn get-request
   "Doing raw http requests"
@@ -42,24 +43,27 @@
                          :error (str "caught exception: " e)})))
 
 
-(defn check-link [link]
-  (let [resp (get-request link :stream)]
+(defn check-link
+  [link http-options]
+  (let [resp (get-request link :stream http-options)]
     {:url link
      :final-url (str (:uri resp))
      :status (:status resp)}
     )
   )
 
-(defn check-links [links]
+(defn check-links
+  [links http-options]
   (log/debug (str "check-links " links " - begin"))
-  (def resp (mapv check-link links))
+  (def resp (mapv #(check-link % http-options)
+                  links))
   (log/debug (str "check-links " links " - end"))
   resp
   )
 
 (defn analyze-get-response
   "I don't do a whole lot."
-  [url resp opts]
+  [url resp ragno-options http-options]
   (log/debug (str "analyze-get-response " url " - begin"))
   (let [body (str (:body resp))
         location (get-in resp [:headers :location] url)
@@ -74,7 +78,9 @@
                             links-ext/remove-links-with-mailto)
         ;; TODO SOme websites have too many links
         ;; https://as.com has too many links and 
-        check-links (check-links (vec (take  (:check-links opts) body-web-links)))
+        check-links (check-links (vec (take  (:check-links ragno-options)
+                                             body-web-links))
+                                 http-options)
         corrupted-links (->> (filterv #( = -1 (:status %)) check-links)
                              (map #(:url %)))
         good-links (->> (map #(:final-url %) check-links)
@@ -120,7 +126,7 @@
             domain (uri-ext/get-domain-url (uri url))
             final-domain (uri-ext/get-domain-url (uri final-url))]
        (if (= domain final-domain)
-         (analyze-get-response url resp ragno-options)
+         (analyze-get-response url resp ragno-options http-options)
          ;; redirect to a new domain. nothing to do, just adding the final domain for a further crawling 
          {:status 301
           :real-status status
@@ -135,8 +141,14 @@
 (defn cli
   [opts]
   (let
-      [surf_opts {:check-links false}]
-    (-> (:url opts)
-        (surf surf_opts {:follow-redirects :always})
-        (json/write-str)
-        println)))
+      [url (:url opts)
+       config-file (:config-file opts)
+       config (read-edn-file config-file)
+       http-options (:http-options config)
+       ragno-options (:ragno-options config)
+       redis (:redis config)]
+    (log/info config)
+        (-> url
+            (surf ragno-options http-options)
+            (json/write-str)
+            println)))

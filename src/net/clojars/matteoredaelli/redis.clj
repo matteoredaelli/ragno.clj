@@ -8,7 +8,7 @@
 
 (ns net.clojars.matteoredaelli.redis
   (:require [clojure.string :as str]
-            [clojure.edn :as edn]
+
             [clojure.java.io :as io]
             [clojure.data.json :as json]
             [clojure.tools.logging :as log]
@@ -16,16 +16,7 @@
             [taoensso.carmine :as car :refer [wcar]]
             ))
 
-(defn read-edn-file [source]
-  (try
-    (with-open [r (io/reader source)]
-      (edn/read (java.io.PushbackReader. r)))
 
-    (catch java.io.IOException e
-      (log/error "Couldn't open '%s': %s\n" source (.getMessage e)))
-    (catch RuntimeException e
-      (log/error "Error parsing edn file '%s': %s\n" source (.getMessage e)))))
-  
 
 (defonce my-conn-pool (car/connection-pool {})) 
 
@@ -82,7 +73,7 @@
   [opts]
   (let
       [config-file (:config-file opts)
-       config (read-edn-file config-file)
+       config (ragno/read-edn-file config-file)
        http-options (:http-options config)
        ragno-options (:ragno-options config)
        redis (:redis config)]
