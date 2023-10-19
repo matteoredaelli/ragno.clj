@@ -119,7 +119,7 @@
   (let [resp (get-request url :string http-options)
         status (:status resp)]
     (if (and (>= status 200)
-             (< status 400))
+             (< status 600))
       (
        ;; check if domain changes
        let [final-url (str (:uri resp))
@@ -141,14 +141,14 @@
 (defn cli
   [opts]
   (let
-      [url (:url opts)
+      [urls (:urls opts)
+       urls-list (clojure.string/split urls #",")
        config-file (:config-file opts)
        config (read-edn-file config-file)
        http-options (:http-options config)
-       ragno-options (:ragno-options config)
-       redis (:redis config)]
+       ragno-options (:ragno-options config)]
     (log/info config)
-        (-> url
-            (surf ragno-options http-options)
-            (json/write-str)
-            println)))
+    (mapv #(-> (surf % ragno-options http-options)
+               (json/write-str)
+               println)
+          urls-list)))
