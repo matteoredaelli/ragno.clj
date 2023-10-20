@@ -101,7 +101,7 @@
      :http-headers (:headers resp)
      :url url
      :final-url (str (:uri resp))
-     :body-headers body-headers
+     ;;:body-headers body-headers
      :links body-web-links
      :corrupted-links corrupted-links
      :good-links good-links
