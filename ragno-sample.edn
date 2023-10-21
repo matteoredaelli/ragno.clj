@@ -1,4 +1,4 @@
-{:http_options {:follow-redirects :always
+{:http-options {:follow-redirects :always
                 ;; :proxy {:host "proxy.local"
                 ;;         :port 80}
                                       

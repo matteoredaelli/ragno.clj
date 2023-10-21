@@ -115,9 +115,14 @@
 (defn surf
   "I don't do a whole lot."
   [url ragno-options http-options]
-  (log/debug (str "surf " url " - begin"))
+  (log/debug (str "surf "
+                  url
+                  "with options"
+                  http-options
+                  " - begin"))
   (let [resp (get-request url :string http-options)
         status (:status resp)]
+    (log/debug resp)
     (if (and (>= status 200)
              (< status 600))
       (
@@ -125,6 +130,7 @@
        let [final-url (str (:uri resp))
             domain (uri-ext/get-domain-url (uri url))
             final-domain (uri-ext/get-domain-url (uri final-url))]
+       (log/debug (str "domain:" domain " , final-domain:" final-domain))
        (if (= domain final-domain)
          (analyze-get-response url resp ragno-options http-options)
          ;; redirect to a new domain. nothing to do, just adding the final domain for a further crawling 
