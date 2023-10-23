@@ -25,11 +25,25 @@
       (edn/read (java.io.PushbackReader. r)))
 
     (catch java.io.IOException e
-      (log/error "Couldn't open '%s': %s\n" source (.getMessage e)))
+      (log/error "Couldn't open '%s': %s\n" source (.getMessage e))
+      (throw (Exception.))
+      )
     (catch RuntimeException e
-      (log/error "Error parsing edn file '%s': %s\n" source (.getMessage e)))))
+      (log/error "Error parsing edn file '%s': %s\n" source (.getMessage e))
+      (throw (Exception.))
+      )))
   
+(defn lazy-contains? [coll key]
+  (boolean (some #(= % key) coll)))
 
+(defn validate-edn-config-or-exit [config]
+  (assert (not= config {} "Empty / Missing config file. Bye"))
+  (let [keys (keys config)]
+    (assert (lazy-contains? keys :http-options) "Missing key ':http-option'. Bye")
+    (assert (lazy-contains? keys :ragno-options) "Missing key ':ragno-option'. Bye")
+    (assert (lazy-contains? keys :redis) "Missing key ':redis'. Bye")
+    ))
+  
 (defn get-request
   "Doing raw http requests"
   [url as http-options]
@@ -154,6 +168,7 @@
        http-options (:http-options config)
        ragno-options (:ragno-options config)]
     (log/info config)
+    (validate-edn-config-or-exit config) 
     (mapv #(-> (surf % ragno-options http-options)
                (json/write-str)
                println)
