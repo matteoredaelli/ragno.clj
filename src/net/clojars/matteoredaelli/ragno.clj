@@ -79,17 +79,17 @@
   "I don't do a whole lot."
   [url resp ragno-options http-options]
   (log/debug (str "analyze-get-response " url " - begin"))
-  (let [body (str (:body resp))
+  (let [body (str (get resp :body ""))
         location (get-in resp [:headers :location] url)
         soup (Jsoup/parse body)
-        ;; body-headers (distinct (html-ext/extract-element-text soup "h1,h2"))
+        body-headers (distinct (html-ext/extract-element-text soup "h1,h2"))
         body-links (distinct (html-ext/extract-links soup))
         emails (distinct (links-ext/filter-email-links body-links))
         body-web-links (->> ;; (conj body-links location)
                         body-links
                         links-ext/remove-empty-links
-                            links-ext/remove-links-with-fragment
-                            links-ext/remove-links-with-mailto)
+                        links-ext/remove-links-with-fragment
+                        links-ext/remove-links-with-mailto)
         ;; TODO SOme websites have too many links
         ;; https://as.com has too many links and 
         check-links (check-links (vec (take  (:check-links ragno-options)

@@ -44,8 +44,16 @@ variables (requires the `ci` task be run first):
 
 Your library will be deployed to net.clojars.matteoredaelli/ragno on clojars.org by default.
 
+## ROADMAP
+
+- Evaluating parallel batch processing
+
+  [ ] with https://github.com/nilenso/goose
+  [ ] with slurm
+  
+  
 ## License
 
-Copyright © 2023 Matteo
+Copyright © 2023 Matteo Redaelli
 
 Distributed under the Eclipse Public License version 2.0.
