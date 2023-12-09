@@ -13,12 +13,27 @@
 (def social-regexs
   [
    ;; thanks to https://github.com/lorey/socials/blob/master/socials/socials.py
-   {:re #"^http[s]?://(www\.)?facebook.com/([A-Za-z0-9_\-\.]+)/?$"
+   {:re #"^http[s]?://(www\.)?facebook\.com/([A-Za-z0-9_\-\.]+)/?$"
     :social :facebook} 
+   {:re #"^http[s]?://(www\.)?facebook\.com/profile\.php\?id=(\d+)$"
+    :social :facebook}
+
+   {:re #"^http[s]?://(www\.)?github\.com/([A-z0-9_.-]+)/?$"
+    :social :github}
+
+   {:re #"^http[s]?://(www\.)?instagram\.com/([A-z0-9_.-]+)/?$"
+    :social :instagram}
+
+   {:re #"^http[s]?://(www\.)?instagr\.am/([A-z0-9_.-]+)/?$"
+    :social :instagram}
    
-   {:re #"^http[s]?://(www\.)?youtube.com/((c|user)/)?([A-z0-9_.-]+)/?$"
+   {:re #"^http[s]?://(www\.)?youtube\.com/((c|user)/)?([A-z0-9_.-]+)/?$"
     :social :youtube}
    
+   
+   {:re #"^http[s]?://(www\.)?twitter\.com/([A-z0-9_.-]+)/?$"
+    :social :twitter}
+
    ]
   )
 
@@ -32,3 +47,11 @@
    (->> (map #(tag-link link %) social-regexs)
         (filter some?)
         )))
+
+(defn tag-links
+  ([links]
+   (->> (map #(tag-link %) links)
+        flatten
+        (reduce merge)
+        )))
+

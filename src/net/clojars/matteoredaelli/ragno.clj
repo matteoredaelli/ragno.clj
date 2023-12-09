@@ -15,6 +15,7 @@
             [net.clojars.matteoredaelli.uri-ext :as uri-ext]
             [net.clojars.matteoredaelli.html-ext :as html-ext]
             [net.clojars.matteoredaelli.links-ext :as links-ext]
+            [net.clojars.matteoredaelli.social-tagger :as social-tagger]
             [clojure.java.io :as io]
             [babashka.http-client :as http]
             [lambdaisland.uri :refer [uri join]]))
@@ -109,7 +110,9 @@
                           (html-ext/extract-head-meta-content soup "property" "og:description")]
         head-keywords (html-ext/extract-head-meta-content soup "name" "keywords")
         head-title [(.title soup)
-                    (html-ext/extract-head-meta-content soup "property" "og:title")]]
+                    (html-ext/extract-head-meta-content soup "property" "og:title")]
+        social-tags (social-tagger/tag-links body-web-links)
+        ]
     (log/debug (str "analyze-get-response " url " - end"))
     {:status (:status resp)
      :http-headers (:headers resp)
@@ -124,6 +127,7 @@
      :head-description head-description
      :head-keywords head-keywords
      :emails emails
+     :social-tags social-tags
      }))
   
 (defn surf

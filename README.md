@@ -12,7 +12,7 @@ cp ragno-sample.edn ragno.edn
 
 Invoke a library API function from the command-line:
 
-    $clojure -X net.clojars.matteoredaelli.ragno/cli :url \"http://redaelli.org\"  :config-file \"ragno.edn\"
+    $clojure -X net.clojars.matteoredaelli.ragno/cli :urls \"https://redaelli.org,https://it.wikipedia.org\"  :config-file \"ragno.edn\"
 
 Using Redis or Apache kvrocks or Snap KeyDB
 
