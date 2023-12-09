@@ -44,18 +44,22 @@
     (assert (lazy-contains? keys :ragno-options) "Missing key ':ragno-option'. Bye")
     (assert (lazy-contains? keys :redis) "Missing key ':redis'. Bye")
     ))
-  
+
+(defn remove-empty-text-from-list
+  [texts]
+  (remove clojure.string/blank? texts))
+
 (defn get-request
   "Doing raw http requests"
   [url as http-options]
-   (log/debug (str "get-request " url " - begin"))
-   (try
-     (http/get url {:as as
-                    :throw false
-                    :client (http/client http-options)})
-     (catch Exception e {:status -1
-                         :url url
-                         :error (str "caught exception: " e)})))
+  (log/debug (str "get-request " url " - begin"))
+  (try
+    (http/get url {:as as
+                   :throw false
+                   :client (http/client http-options)})
+    (catch Exception e {:status -1
+                        :url url
+                        :error (str "caught exception: " e)})))
 
 
 (defn check-link
@@ -123,7 +127,7 @@
      :corrupted-links corrupted-links
      :good-links good-links
      :domain-links domain-links
-     :head-title head-title
+     :head-title (remove-empty-text-from-list head-title)
      :head-description head-description
      :head-keywords head-keywords
      :emails emails
