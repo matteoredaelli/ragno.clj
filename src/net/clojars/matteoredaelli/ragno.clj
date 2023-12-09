@@ -128,7 +128,7 @@
      :good-links good-links
      :domain-links domain-links
      :head-title (remove-empty-text-from-list head-title)
-     :head-description head-description
+     :head-description (remove-empty-text-from-list head-description)
      :head-keywords head-keywords
      :emails emails
      :social-tags social-tags
