@@ -30,6 +30,8 @@
    {:re #"^http[s]?://(www\.)?youtube\.com/((c|user)/)?([A-z0-9_.-]+)/?$"
     :social :youtube}
    
+   {:re #"^http[s]?://(www\.)?tiktok\.com/@([A-z0-9_.-]+)/?$"
+    :social :tiktok}
    
    {:re #"^http[s]?://(www\.)?twitter\.com/([A-z0-9_.-]+)/?$"
     :social :twitter}
