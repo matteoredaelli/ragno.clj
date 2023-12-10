@@ -47,7 +47,9 @@
 
 (defn remove-empty-text-from-list
   [texts]
-  (remove clojure.string/blank? texts))
+  ( ->> texts
+   (remove clojure.string/blank?)
+   distinct))
 
 (defn get-request
   "Doing raw http requests"
