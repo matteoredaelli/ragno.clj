@@ -59,6 +59,8 @@
   (try
     (http/get url {:as as
                    :throw false
+                   :headers {:Accept-Language "en-US,en;q=0.5,it;q=0.4,*;q=0.1"}
+                   :timeout 10000
                    :client (http/client http-options)})
     (catch Exception e {:status -1
                         :url url
@@ -114,11 +116,11 @@
                           links-ext/remove-empty-links
                           links-ext/get-domain-links
                           distinct)
-        head-description [(html-ext/extract-head-meta-content soup "name" "description")
-                          (html-ext/extract-head-meta-content soup "property" "og:description")]
+        description [(html-ext/extract-head-meta-content soup "name" "description")
+                     (html-ext/extract-head-meta-content soup "property" "og:description")]
         head-keywords (html-ext/extract-head-meta-content soup "name" "keywords")
-        head-title [(.title soup)
-                    (html-ext/extract-head-meta-content soup "property" "og:title")]
+        title [(.title soup)
+               (html-ext/extract-head-meta-content soup "property" "og:title")]
         social-tags (social-tagger/tag-links body-web-links)
         tags (tagger/tag headers body url)
         ]
@@ -133,9 +135,9 @@
      :corrupted-links corrupted-links
      :good-links good-links
      :domain-links domain-links
-     :head-title (remove-empty-text-from-list head-title)
-     :head-description (remove-empty-text-from-list head-description)
-     :head-keywords head-keywords
+     :title (remove-empty-text-from-list title)
+     :description (remove-empty-text-from-list description)
+     :keywords head-keywords
      :emails emails
      :social-tags social-tags
      :tags tags

@@ -19,8 +19,18 @@
     :tags [:plang:php :sw:mediawiki]} 
    {:re (re-pattern (str prefix "/?wp-content"))
     :tags [:plang:php :sw:wordpress]}
+   {:re (re-pattern "This website is like a Rocket,")
+    :tags [:plang:php :sw:wordpress :sw:wp-rocket]}
+   {:re (re-pattern "jquery.*.js")
+    :tags [:sw:jQuery]}
+   {:re (re-pattern "react.*.js")
+    :tags [:sw:reactjs]}
+   {:re (re-pattern "angular.*.js")
+    :tags [:sw:angularjs]}
+   {:re (re-pattern "vue.*.js")
+    :tags [:sw:vuejs]}
    {:re (re-pattern (str prefix "[\\S]+\\.php"))
-    :tags [:plang:php]} 
+    :tags [:plang:php]}
    ]
   )
 
@@ -41,41 +51,56 @@
 
 (def key-values-regexs
   [
-   {:re #"apache|httpd"
+   {:re #"(?i)apache|httpd"
     :tags [:sw:apache] }
-   {:re #"lightspeed"
+   {:re #"(?i)lightspeed"
     :tags [:sw:lightspeed] } 
-   {:re #"nginx"
-    :tags [:sw:nginx] }   
-   {:re #"-amz"
+   {:re #"(?i)nginx"
+    :tags [:sw:nginx] }
+   {:re #"(?i)openresty"
+    :tags [:sw:openresty] } 
+   {:re #"(?i)-amz"
     :tags [:cloud:aws] }
-   {:re #"-aruba"
+   {:re #"(?i)-aruba"
     :tags [:cloud:aruba] }
-   {:re #"-azure"
-    :tags [:cloud:azure] }
-   {:re #"cloudflare"
-    :tags [:cloud:aws :cdn:cloudflare] }
-   {:re #"cloudfront"
+   {:re #"(?i)-aruba"
+    :tags [:cloud:aruba] }
+   {:re #"(?i)gws"
+    :tags [:cloud:google] }
+   {:re #"(?i)x-goog"
+    :tags [:cloud:google] }
+   {:re #"(?i)x-ec-"
+    :tags [:cloud:edgio] }
+   {:re #"(?i)x-edg-"
+    :tags [:cloud:edgio] } 
+   {:re #"(?i)netlify"
+    :tags [:cloud:netlify] }
+   {:re #"(?i)cf-ray"
+    :tags [:cdn:cloudflare] }
+   {:re #"(?i)cloudflare"
+    :tags [:cdn:cloudflare] }
+   {:re #"(?i)cloudfront"
     :tags [:cloud:aws :cdn:cloudfront] }
-   {:re #"akamai"
-    :tags [:cloud:aws :cdn:akamai] }
-   {:re #"bigip"
+   {:re #"(?i)akamai"
+    :tags [:cdn:akamai] }
+   {:re #"(?i)bigip"
     :tags [:sw:bigip]}
-   {:re #"varnish"
+   {:re #"(?i)varnish"
     :tags [:sw:varnish]}
-   {:re #"joomla"
+   {:re #"(?i)joomla"
     :tags [:sw:joomla :plang:php]}
-   {:re #"drupal"
+   {:re #"(?i)drupal"
     :tags [:sw:drupal :plang:php]}   
-   {:re #"x-node"
+   {:re #"(?i)x-node"
     :tags [:plang:nodejs]}
-   {:re #"x-wp"
-    :tags [:sw:wordpress :plang:php]}
-  ])
+   {:re #"(?i)x-wp"
+    :tags [:sw:wordpress :plang:php]}])
 
 (defn tag-headers
   [headers]
   (let [keys (keys headers)
+        ;; TODO:
+        ;; remove value for "content-security-policy"  . es twitter does not use cloudfront 
         vals (vals headers)
         keys_vals (concat keys vals)
         text (clojure.string/join " " keys_vals)]

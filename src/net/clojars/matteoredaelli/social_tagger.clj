@@ -26,8 +26,11 @@
 
    {:re #"^http[s]?://(www\.)?instagr\.am/([A-z0-9_.-]+)/?$"
     :social :instagram}
+
+   {:re #"^http[s]?://(www\.)?linkedin\.com/(company/)?([A-z0-9_.-@]+)/?"
+    :social :linkedin}
    
-   {:re #"^http[s]?://(www\.)?youtube\.com/((c|user)/)?([A-z0-9_.-]+)/?$"
+   {:re #"^http[s]?://(www\.)?youtube\.com/((c|user)/)?([A-z0-9_.-@]+)/?"
     :social :youtube}
    
    {:re #"^http[s]?://(www\.)?tiktok\.com/@([A-z0-9_.-]+)/?$"
