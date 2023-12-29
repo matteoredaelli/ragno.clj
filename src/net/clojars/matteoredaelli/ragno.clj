@@ -16,6 +16,7 @@
             [net.clojars.matteoredaelli.html-ext :as html-ext]
             [net.clojars.matteoredaelli.links-ext :as links-ext]
             [net.clojars.matteoredaelli.social-tagger :as social-tagger]
+            [net.clojars.matteoredaelli.tagger :as tagger]
             [clojure.java.io :as io]
             [babashka.http-client :as http]
             [lambdaisland.uri :refer [uri join]]))
@@ -86,7 +87,8 @@
   "I don't do a whole lot."
   [url resp ragno-options http-options]
   (log/debug (str "analyze-get-response " url " - begin"))
-  (let [body (str (get resp :body ""))
+  (let [headers (:headers resp)
+        body (str (get resp :body ""))
         location (get-in resp [:headers :location] url)
         soup (Jsoup/parse body)
         body-headers (distinct (html-ext/extract-element-text soup "h1,h2"))
@@ -118,10 +120,12 @@
         head-title [(.title soup)
                     (html-ext/extract-head-meta-content soup "property" "og:title")]
         social-tags (social-tagger/tag-links body-web-links)
+        tags (tagger/tag headers body url)
         ]
     (log/debug (str "analyze-get-response " url " - end"))
     {:status (:status resp)
-     :http-headers (:headers resp)
+     :body body
+     :http-headers headers
      :url url
      :final-url (str (:uri resp))
      ;;:body-headers body-headers
@@ -134,6 +138,7 @@
      :head-keywords head-keywords
      :emails emails
      :social-tags social-tags
+     :tags tags
      }))
   
 (defn surf
