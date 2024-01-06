@@ -99,9 +99,12 @@
         body-web-links (->> ;; (conj body-links location)
                         body-links
                         links-ext/remove-empty-links
-                        links-ext/remove-links-with-fragment
-                        links-ext/remove-links-with-mailto)
-        ;; TODO SOme websites have too many links
+                        links-ext/cleanup-wwwN
+                        links-ext/remove-fragments
+                        links-ext/clean-wwwN
+                        links-ext/remove-links-with-mailto
+                        distinct)
+        ;; Some websites have too many links
         ;; https://as.com has too many links and 
         check-links (check-links (vec (take  (:check-links ragno-options)
                                              body-web-links))
@@ -126,7 +129,7 @@
         ]
     (log/debug (str "analyze-get-response " url " - end"))
     {:status (:status resp)
-     :body body
+     :body (if (:include-body ragno-options) body nil)
      :http-headers headers
      :url url
      :final-url (str (:uri resp))
@@ -169,6 +172,7 @@
           :real-status status
           :url url
           :final-url final-url
+          :final-domain final-domain
           :link-domains [final-domain]}
          ))
       ;; status not ok

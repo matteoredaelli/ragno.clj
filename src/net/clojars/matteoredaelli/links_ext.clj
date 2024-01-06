@@ -11,6 +11,16 @@
             [net.clojars.matteoredaelli.uri-ext :as uri-ext]))
 
 
+(defn cleanup-wwwN
+  [link]
+  (map #(clojure.string/replace % #"www\d+\." "www."))
+       links)
+  
+(defn remove-fragments
+  [links]
+  (map #(uri-ext/remove-fragment (uri %))
+       links)
+  )
 (defn remove-links-with-fragment
   [links]
   (filterv #(not (clojure.string/includes? % "#")) links)

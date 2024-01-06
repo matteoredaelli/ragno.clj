@@ -44,6 +44,13 @@ variables (requires the `ci` task be run first):
 
 Your library will be deployed to net.clojars.matteoredaelli/ragno on clojars.org by default.
 
+##
+
+cat out.jl |jq -r '[.url, .status, (.title? // [""] | join(". ")), (.description? // [""] | join(". ")), (."social-tags" // [""] | join(","))] |@tsv'
+
+A
+A
+
 ## ROADMAP
 
 - Evaluating parallel batch processing

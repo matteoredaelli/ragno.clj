@@ -83,8 +83,10 @@
     :tags [:cloud:aws :cdn:cloudfront] }
    {:re #"(?i)akamai"
     :tags [:cdn:akamai] }
+   {:re #"(?i)express"
+    :tags [:sw:express :plang:nodejs]}
    {:re #"(?i)bigip"
-    :tags [:sw:bigip]}
+    :tags [:sw:bigip]}   
    {:re #"(?i)varnish"
     :tags [:sw:varnish]}
    {:re #"(?i)joomla"
@@ -98,10 +100,11 @@
 
 (defn tag-headers
   [headers]
-  (let [keys (keys headers)
-        ;; TODO:
-        ;; remove value for "content-security-policy"  . es twitter does not use cloudfront 
-        vals (vals headers)
+  (let [
+        ;; remove key/value for "content-security-policy"  . es twitter does not use cloudfront
+        cleaned_headers (apply dissoc headers ["content-security-policy-report-only" "content-security-policy"])
+        keys (keys cleaned_headers)
+        vals (vals cleaned_headers)
         keys_vals (concat keys vals)
         text (clojure.string/join " " keys_vals)]
     (->> (map #(tag-text-by-regex text %)

@@ -10,6 +10,22 @@
   (:require [lambdaisland.uri :refer [uri join]]))
 
 ;;; URI
+
+
+(defn second-level-domain
+  ;;; www.apache.org -> apache.org
+  [uri1]
+  (let [hostname (:host uri1)
+        hlist (clojure.string/split hostname #"\.")
+        c (count hlist)
+        dom1 (nth hlist (- c 1))
+        dom2 (nth hlist (- c 2))]
+    (str dom2 "." dom1)))
+
+(defn same-second-level-domain?
+  [uri1 uri2]
+  (= (second-level-domain uri1) (second-level-domain uri2)))
+
 (defn same-field?
   [uri1 uri2 field]
   (= (field uri1) (field uri2)))
@@ -32,3 +48,14 @@
   [uri1]
   (str (assoc uri1 :path nil :fragment nil :query nil)))
 
+(defn remove-fragment
+  [uri1]
+  (str (assoc uri1 :fragment nil :query nil)))
+
+(defn remove-query
+  [uri1]
+  (str (assoc uri1 :query nil)))
+
+(defn convert-to-https-url
+  [uri1]
+  (str (assoc uri1 :scheme "https")))
