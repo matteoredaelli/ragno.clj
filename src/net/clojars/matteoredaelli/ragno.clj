@@ -101,7 +101,6 @@
                         links-ext/remove-empty-links
                         links-ext/cleanup-wwwN
                         links-ext/remove-fragments
-                        links-ext/clean-wwwN
                         links-ext/remove-links-with-mailto
                         distinct)
         ;; Some websites have too many links
