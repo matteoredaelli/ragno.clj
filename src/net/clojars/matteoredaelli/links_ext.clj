@@ -12,7 +12,7 @@
 
 
 (defn cleanup-wwwN
-  [link]
+  [links]
   (map #(clojure.string/replace % #"www\d+\." "www."))
        links)
   
