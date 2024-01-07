@@ -181,8 +181,9 @@
 (defn cli
   [opts]
   (let
-      [urls (:urls opts)
-       urls-list (clojure.string/split urls #",")
+      [urlfile (:urlfile opts)
+       urls (slurp urlfile)
+       urls-list (clojure.string/split urls #"\n")
        config-file (:config-file opts)
        config (read-edn-file config-file)
        http-options (:http-options config)
