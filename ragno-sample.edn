@@ -5,7 +5,8 @@
                  ;; :connect-timeout  10000
                  ;; :throw-exceptions false
                  }
- :ragno-options {:check-links 20}
+ :ragno-options {:check-links 20
+                 :include-body false}
  :redis {:url "redis://localhost:6379/"
          :queue-name "ragno"}
  }
