@@ -6,11 +6,16 @@ PARSED_FILES = ${RAW_FILES:.raw=.parsed}
 VISITED_FILES = ${RAW_FILES:.raw=.tmp.visited}
 REDIRECTS_FILES = ${RAW_FILES:.raw=.tmp.redirects}
 LINKED_FILES = ${RAW_FILES:.raw=.tmp.linked}
+TODO_FILES = $(wildcard ${RAGNO_DATA}/*.todo)
+DONE_FILES = ${TODO_FILES:.todo=.done}
 
 TS=$(shell date +"%Y%m%d-%H%M%S-$$$$")
 
 help:
 	echo ${RAW_FILES} ${VISITED_FILES}
+
+clean-tmp:
+	@rm -f ${RAGNO_DATA}/*.tmp.*
 
 clean:
 	@rm -f ${RAGNO_DATA}/*.tmp.*  ${RAGNO_DATA}/*.todo ${RAGNO_DATA}/redirects ${RAGNO_DATA}/linked ${RAGNO_DATA}/visited
@@ -42,9 +47,12 @@ todo: visited redirects linked
 ## [X] considering only https: converting http links to https links
 ## [X] removing adult contents
 ## [X] removing www?.  (www2,..)
-	cat ${RAGNO_DATA}/redirects ${RAGNO_DATA}/linked | grep -v porn | grep -v sex | grep -v xxx | sed -e 's/http:/https:/' | sed -r 's/www[0-9]?\.//'| egrep "^https?://(www\.)?[^.]+\.[^.]+$$" | fgrep -v -f ${RAGNO_DATA}/visited > ${RAGNO_DATA}/todo.csv
+	cat ${RAGNO_DATA}/redirects ${RAGNO_DATA}/linked | grep -v porn | grep -v sex | grep -v xxx | sed -e 's/http:/https:/' | sed -r 's/www[0-9]?\.//'| egrep "^https?://(www\.)?[^.]+\.[^.]+$$" | fgrep -v -f ${RAGNO_DATA}/visited > ${RAGNO_DATA}/${TS}.todo
 
-run: ${RAGNO_DATA}/todo.csv
-	clojure -X net.clojars.matteoredaelli.ragno/cli :urlfile \"${RAGNO_DATA}/todo.csv\"  :config-file \"ragno.edn\" > ${RAGNO_DATA}/${TS}.raw
-	@mv ${RAGNO_DATA}/todo ${RAGNO_DATA}/${TS}.todo
+%.done: %.todo
+	clojure -X net.clojars.matteoredaelli.ragno/cli :urlfile \"$<\"  :config-file \"ragno.edn\" > ${<:.todo=.raw}
+	@mv $< $@
+
+run: ${DONE_FILES}
+	@rm -f ${RAGNO_DATA}/*.tmp.*
 

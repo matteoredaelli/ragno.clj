@@ -5,8 +5,8 @@
       <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
     </encoder>
   </appender>
-  <root level="DEBUG">
+  <root level="INFO">
     <appender-ref ref="STDERR" />
   </root>
-  <logger name="matteoredaelli.ragno" level="DEBUG" />
+  <logger name="matteoredaelli.ragno" level="INFO" />
 </configuration>
