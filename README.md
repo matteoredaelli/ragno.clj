@@ -48,8 +48,9 @@ Your library will be deployed to net.clojars.matteoredaelli/ragno on clojars.org
 
 cat out.jl |jq -r '[.url, .status, (.title? // [""] | join(". ")), (.description? // [""] | join(". ")), (."social-tags" // [""] | join(","))] |@tsv'
 
-A
-A
+## TODO
+
+[ ] error with https://sam-rogers.com
 
 ## ROADMAP
 

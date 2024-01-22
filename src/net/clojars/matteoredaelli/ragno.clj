@@ -178,6 +178,13 @@
       resp
       )))
 
+(defn safe-json-encode
+  [obj]
+  (try 
+    (json/write-str obj)
+    (catch Exception e (str "{\"error\": \""  (.getMessage e) "\"}" )))
+  )
+
 (defn cli
   [opts]
   (let
@@ -191,6 +198,6 @@
     (log/info config)
     (validate-edn-config-or-exit config) 
     (mapv #(-> (surf % ragno-options http-options)
-               (json/write-str)
+               safe-json-encode
                println)
           urls-list)))

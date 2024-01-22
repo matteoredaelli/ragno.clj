@@ -7,12 +7,17 @@ VISITED_FILES = ${RAW_FILES:.raw=.tmp.visited}
 REDIRECTS_FILES = ${RAW_FILES:.raw=.tmp.redirects}
 LINKED_FILES = ${RAW_FILES:.raw=.tmp.linked}
 TODO_FILES = $(wildcard ${RAGNO_DATA}/*.todo)
-DONE_FILES = ${TODO_FILES:.todo=.done}
+TODOSPLIT_FILES = $(wildcard ${RAGNO_DATA}/*.todo.split)
+DONE_FILES = ${TODOSPLIT_FILES:.todo.split=.done}
 
-TS=$(shell date +"%Y%m%d-%H%M%S-$$$$")
+TS=$(shell date +"%Y%m%d-%H%M-$$PPID")
 
 help:
 	echo ${RAW_FILES} ${VISITED_FILES}
+
+testts:
+	echo ${TS}
+	echo ${TS}
 
 clean-tmp:
 	@rm -f ${RAGNO_DATA}/*.tmp.*
@@ -47,12 +52,28 @@ todo: visited redirects linked
 ## [X] considering only https: converting http links to https links
 ## [X] removing adult contents
 ## [X] removing www?.  (www2,..)
-	cat ${RAGNO_DATA}/redirects ${RAGNO_DATA}/linked | grep -v porn | grep -v sex | grep -v xxx | sed -e 's/http:/https:/' | sed -r 's/www[0-9]?\.//'| egrep "^https?://(www\.)?[^.]+\.[^.]+$$" | fgrep -v -f ${RAGNO_DATA}/visited > ${RAGNO_DATA}/${TS}.todo
+	cat ${RAGNO_DATA}/redirects ${RAGNO_DATA}/linked | grep -v porn | grep -v adult | grep -v sex | grep -v xxx | sed -e 's/http:/https:/' | sed -r 's/www[0-9]?\.//'| egrep "^https?://(www\.)?[^.]+\.[^.]+$$" | fgrep -v -f ${RAGNO_DATA}/visited > ${RAGNO_DATA}/${TS}.todo
+	split -l500 --additional-suffix=.todo.split ${RAGNO_DATA}/${TS}.todo ${RAGNO_DATA}/${TS}_
+	mv  ${RAGNO_DATA}/${TS}.todo  ${RAGNO_DATA}/${TS}.done
 
-%.done: %.todo
-	clojure -X net.clojars.matteoredaelli.ragno/cli :urlfile \"$<\"  :config-file \"ragno.edn\" > ${<:.todo=.raw}
+%.done: %.todo.split
+	clojure -X net.clojars.matteoredaelli.ragno/cli :urlfile \"$<\"  :config-file \"ragno.edn\" > ${<:.todo.split=.raw}
 	@mv $< $@
 
 run: ${DONE_FILES}
 	@rm -f ${RAGNO_DATA}/*.tmp.*
 
+tags:
+	cat ${RAGNO_DATA}/*.parsed |jq -r '.tags?[]?' | sort -u > ${RAGNO_DATA}/tags
+	cat ${RAGNO_DATA}/*.parsed ${RAGNO_DATA}/*.raw |jq -r '[.url, .status, ."tags"?[]?] |@tsv'|  grep -v "\-1$$" | sort -u > ${RAGNO_DATA}/domains_with_tags
+
+domains-by-tag: tags
+	cat ${RAGNO_DATA}/tags | while read tag ; do echo TAG $tag ; grep $tag domains-with-tags | cut -f1 > ${RAGNO_DATA}/domains-by-tag-${tag}; done
+
+info: tags
+	@echo Visited sites:
+	@wc -l  ${RAGNO_DATA}/domains_with_tags | cut -f1 -d' '
+	@echo TOP level1 domains:
+	@cat ${RAGNO_DATA}/domains_with_tags | cut -f1 | cut -f2 -d'.'| cut -f1 -d':' |  sort | uniq -c | sort -n -r | head -20
+	@echo TOP TAGS
+	@wc -l  ${RAGNO_DATA}/domains-tag-* | sort -nr | grep -v "total$$"
