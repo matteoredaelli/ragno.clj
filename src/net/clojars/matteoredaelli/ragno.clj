@@ -190,7 +190,7 @@
   (let
       [urlfile (:urlfile opts)
        urls (slurp urlfile)
-       urls-list (clojure.string/split urls #"\n")
+       urls-list (clojure.string/split urls #"\n") ;; TODO could use clojure.string/split-lines
        config-file (:config-file opts)
        config (read-edn-file config-file)
        http-options (:http-options config)
@@ -201,3 +201,20 @@
                safe-json-encode
                println)
           urls-list)))
+
+(defn cli-pmap
+  [opts]
+  (let
+      [urlfile (:urlfile opts)
+       urls (slurp urlfile)
+       urls-list (clojure.string/split urls #"\n") ;; TODO could use clojure.string/split-lines
+       config-file (:config-file opts)
+       config (read-edn-file config-file)
+       http-options (:http-options config)
+       ragno-options (:ragno-options config)]
+    (log/info config)
+    (validate-edn-config-or-exit config) 
+    (doall (pmap #(-> (surf % ragno-options http-options)
+                      safe-json-encode
+                      println)
+                 urls-list))))
