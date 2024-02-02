@@ -92,7 +92,7 @@
   (let [headers (:headers resp)
         body (str (get resp :body ""))
         location (get-in resp [:headers :location] url)
-        soup (Jsoup/parse body)
+        soup (Jsoup/parse body "UTF-8")
         body-headers (distinct (html-ext/extract-element-text soup "h1,h2"))
         body-links (distinct (html-ext/extract-links soup))
         emails (distinct (links-ext/filter-email-links body-links))

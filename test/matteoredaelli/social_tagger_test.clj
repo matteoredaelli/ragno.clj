@@ -5,32 +5,38 @@
 
 (deftest facebook-test
   (testing "tag facebook"
-    (is (= (list {:facebook "wikipedia"})
+    (is (= (list "facebook:wikipedia")
            (tag-link "http://www.facebook.com/wikipedia")
            ))
-    (is (= (list {:facebook "wikipedia"})
+    (is (= (list "facebook:wikipedia")
            (tag-link "https://www.facebook.com/wikipedia")
            ))
-    (is (= (list {:facebook "1111"})
+    (is (= (list "facebook:1111")
            (tag-link "https://www.facebook.com/profile.php?id=1111")
            ))
     ))
 
 (deftest github-test
   (testing "tag github"
-    (is (= (list {:github "wikimedia"})
+    (is (= (list "github:wikimedia")
            (tag-link "https://github.com/wikimedia")
            ))
     ))
+
 (deftest youtube-test
   (testing "tag youtube"
-    (is (= (list {:youtube "wikipedia"})
+    (is (= (list "youtube:wikipedia")
            (tag-link "http://www.youtube.com/wikipedia")
            ))
-    (is (= (list {:youtube "wikipedia"})
+    (is (= (list "youtube:wikipedia")
            (tag-link "https://www.youtube.com/wikipedia")
            ))
-    (is (= (list {:youtube "wikipedia"})
+    (is (= (list "youtube:wikipedia")
            (tag-link "https://www.youtube.com/user/wikipedia")
            ))
     ))
+
+(deftest taglinks-test
+  (testing "tag links"
+    (is (= (list "github:wikimedia""youtube:wikipedia")
+           (tag-links ["https://github.com/wikimedia" "https://www.youtube.com/wikipedia"])))))

@@ -14,30 +14,30 @@
   [
    ;; thanks to https://github.com/lorey/socials/blob/master/socials/socials.py
    {:re #"^http[s]?://(www\.)?facebook\.com/([A-Za-z0-9_\-\.]+)/?$"
-    :social :facebook} 
+    :social "facebook"} 
    {:re #"^http[s]?://(www\.)?facebook\.com/profile\.php\?id=(\d+)$"
-    :social :facebook}
+    :social "facebook"}
 
    {:re #"^http[s]?://(www\.)?github\.com/([A-z0-9_.-]+)/?$"
-    :social :github}
+    :social "github"}
 
    {:re #"^http[s]?://(www\.)?instagram\.com/([A-z0-9_.-]+)/?$"
-    :social :instagram}
+    :social "instagram"}
 
    {:re #"^http[s]?://(www\.)?instagr\.am/([A-z0-9_.-]+)/?$"
-    :social :instagram}
+    :social "instagram"}
 
    {:re #"^http[s]?://(www\.)?linkedin\.com/(company/)?([A-z0-9_.-@]+)/?"
-    :social :linkedin}
+    :social "linkedin"}
    
    {:re #"^http[s]?://(www\.)?youtube\.com/((c|user)/)?([A-z0-9_.-@]+)/?"
-    :social :youtube}
+    :social "youtube"}
    
    {:re #"^http[s]?://(www\.)?tiktok\.com/@([A-z0-9_.-]+)/?$"
-    :social :tiktok}
+    :social "tiktok"}
    
    {:re #"^http[s]?://(www\.)?twitter\.com/([A-z0-9_.-]+)/?$"
-    :social :twitter}
+    :social "twitter"}
 
    ]
   )
@@ -47,16 +47,17 @@
    (let [name (last (re-matches (:re regex-entry) link))]
      (if (= name nil)
        nil
-       {(:social regex-entry) name})))
+       (str (:social regex-entry) ":" name))))
   ([link]
    (->> (map #(tag-link link %) social-regexs)
         (filter some?)
+        distinct
         )))
 
 (defn tag-links
   ([links]
    (->> (map #(tag-link %) links)
         flatten
-        (reduce merge)
+        ;;(reduce merge)
         )))
 
