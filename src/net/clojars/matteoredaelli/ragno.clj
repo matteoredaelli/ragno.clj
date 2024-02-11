@@ -185,24 +185,19 @@
     (catch Exception e (str "{\"error\": \""  (.getMessage e) "\"}" )))
   )
 
-(defn cli
-  [opts]
-  (let
-      [urlfile (:urlfile opts)
-       urls (slurp urlfile)
-       urls-list (clojure.string/split urls #"\n") ;; TODO could use clojure.string/split-lines
-       config-file (:config-file opts)
-       config (read-edn-file config-file)
-       http-options (:http-options config)
-       ragno-options (:ragno-options config)]
+(defn surf-urls
+  [urls-list config]
+  (let [http-options (:http-options config)
+        ragno-options (:ragno-options config)]
     (log/info config)
+    (log/debug urls-list)
     (validate-edn-config-or-exit config) 
-    (mapv #(-> (surf % ragno-options http-options)
-               safe-json-encode
-               println)
-          urls-list)))
+    (doall (pmap #(-> (surf % ragno-options http-options)
+                      safe-json-encode
+                      println)
+                 urls-list))))
 
-(defn cli-pmap
+(defn cli-pmap-orig
   [opts]
   (let
       [urlfile (:urlfile opts)
@@ -218,3 +213,18 @@
                       safe-json-encode
                       println)
                  urls-list))))
+
+(defn cli
+  [opts]
+  (let
+      [urlfile (:urlfile opts false)
+       other-urls-str (:urls opts "")
+       other-urls (clojure.string/split other-urls-str  #",")
+       urls-from-file (if urlfile
+                        (clojure.string/split (slurp urlfile)  #"\n")
+                        [])
+       urls-list (concat urls-from-file other-urls)
+       ;;urls-list (clojure.string/split urls #"\n") ;; TODO could use clojure.string/split-lines
+       config-file (:config-file opts)
+       config (read-edn-file config-file)]
+    (surf-urls urls-list config)))

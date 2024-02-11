@@ -23,7 +23,7 @@ clean-tmp:
 	@rm -f ${RAGNO_DATA}/*.tmp.*
 
 clean:
-	@rm -f ${RAGNO_DATA}/*.tmp.*  ${RAGNO_DATA}/*.todo ${RAGNO_DATA}/redirects ${RAGNO_DATA}/linked ${RAGNO_DATA}/visited
+	@rm -f ${RAGNO_DATA}/*.tmp.* ${RAGNO_DATA}/*.parsed ${RAGNO_DATA}/*.done ${RAGNO_DATA}/*.todo ${RAGNO_DATA}/redirects ${RAGNO_DATA}/linked ${RAGNO_DATA}/visited
 
 setup:
 	mkdir -p ${RAGNO_DATA}
@@ -33,7 +33,7 @@ reset: clean setup
 
 %.parsed: %.raw
 	cat $< | jq -r '.url' | sort -u >  ${@:.parsed=.tmp.visited}
-	cat $< |  jq -r '[."final-domain", .status] | @csv' | grep 301 | cut -f1 -d',' | sed 's/"//g' | sort -u > ${@:.parsed=.tmp.redirects}
+	cat $< | jq -r '[."final-domain", .status] | @csv' | grep 301 | cut -f1 -d',' | sed 's/"//g' | sort -u > ${@:.parsed=.tmp.redirects}
 	cat $< | jq -r '."domain-links"[]?' | sort -u > ${@:.parsed=.tmp.linked}
 	mv $< $@
 
@@ -52,12 +52,12 @@ todo: visited redirects linked
 ## [X] considering only https: converting http links to https links
 ## [X] removing adult contents
 ## [X] removing www?.  (www2,..)
-	cat ${RAGNO_DATA}/redirects ${RAGNO_DATA}/linked | grep -v porn | grep -v adult | grep -v sex | grep -v xxx | sed -e 's/http:/https:/' | sed -r 's/www[0-9]?\.//'| egrep "^https?://(www\.)?[^.]+\.[^.]+$$" | tr '[:upper:]' '[:lower:]' | grep -v ru$$ | sort -u | fgrep -v -f ${RAGNO_DATA}/visited > ${RAGNO_DATA}/${TS}.todo
+	cat ${RAGNO_DATA}/redirects ${RAGNO_DATA}/linked | fgrep -v -f config/domain-stoplist.csv | egrep -f config/domain-regex.csv | sed -e 's/http:/https:/' | sed -r 's/www?[0-9]?\.//'| egrep "^https?://(www\.)?[^.]+\.[^.]+$$" | tr '[:upper:]' '[:lower:]' | sort -u | fgrep -v -f ${RAGNO_DATA}/visited > ${RAGNO_DATA}/${TS}.todo
 	split -l500 --additional-suffix=.todo.split ${RAGNO_DATA}/${TS}.todo ${RAGNO_DATA}/${TS}_
 	mv  ${RAGNO_DATA}/${TS}.todo  ${RAGNO_DATA}/${TS}.done
 
 %.done: %.todo.split
-	clojure -X net.clojars.matteoredaelli.ragno/cli-pmap :urlfile \"$<\"  :config-file \"ragno.edn\" > ${<:.todo.split=.raw}
+	clojure -X net.clojars.matteoredaelli.ragno/cli :urlfile \"$<\"  :config-file \"ragno.edn\" > ${<:.todo.split=.raw}
 	@mv $< $@
 
 run: ${DONE_FILES}

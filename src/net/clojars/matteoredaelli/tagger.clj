@@ -63,7 +63,7 @@
     :tags [:cloud:aws] }
    {:re #"(?i)-aruba"
     :tags [:cloud:aruba] }
-   {:re #"(?i)-aruba"
+   {:re #"(?i)aruba\.it"
     :tags [:cloud:aruba] }
    {:re #"(?i)gws"
     :tags [:cloud:google] }
