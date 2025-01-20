@@ -11,7 +11,7 @@
             [net.clojars.matteoredaelli.uri-ext :as uri-ext]))
 
 
-(defn cleanup-wwwN
+(defn cleanup-www
   [links]
   (map #(clojure.string/replace % #"www\d+\." "www."))
        links)

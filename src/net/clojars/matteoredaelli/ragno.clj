@@ -99,7 +99,7 @@
         body-web-links (->> ;; (conj body-links location)
                         body-links
                         links-ext/remove-empty-links
-                        links-ext/cleanup-wwwN
+                        links-ext/cleanup-www
                         links-ext/remove-fragments
                         links-ext/remove-links-with-mailto
                         distinct)

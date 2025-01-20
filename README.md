@@ -12,7 +12,7 @@ cp ragno-sample.edn ragno.edn
 
 Invoke a library API function from the command-line:
 
-    $clojure -X net.clojars.matteoredaelli.ragno/cli :urlfile \urls.csv\"  :config-file \"ragno.edn\"
+    $clojure -X net.clojars.matteoredaelli.ragno/cli :urlfile \"urls.csv\"  :config-file \"ragno.edn\"
 
 Using Redis or Apache kvrocks or Snap KeyDB
 
