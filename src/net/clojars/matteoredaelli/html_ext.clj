@@ -24,3 +24,7 @@
   (let [links (.select soup "a")]
     (distinct (mapv extract-link-data links))))
 
+
+(defn clean-body [body]
+  ;; remove svg images (see body of workpress.com)
+  (clojure.string/replace body #"<svg.*>.*</svg>" ""))

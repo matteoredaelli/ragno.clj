@@ -128,7 +128,7 @@
         ]
     (log/debug (str "analyze-get-response " url " - end"))
     {:status (:status resp)
-     :body (if (:include-body ragno-options) body nil)
+     :body (if (:include-body ragno-options) (html-ext/clean-body body) nil)
      :http-headers headers
      :url url
      :final-url (str (:uri resp))

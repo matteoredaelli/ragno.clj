@@ -19,7 +19,7 @@
     :tags [:plang:php :sw:mediawiki]} 
    {:re (re-pattern (str prefix "/?wp-content"))
     :tags [:plang:php :sw:wordpress]}
-   {:re (re-pattern "This website is like a Rocket,")
+   {:re (re-pattern "This website is like a Rocket")
     :tags [:plang:php :sw:wordpress :sw:wp-rocket]}
    {:re (re-pattern "jquery.*.js")
     :tags [:sw:jQuery]}
